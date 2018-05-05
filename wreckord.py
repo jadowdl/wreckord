@@ -2,11 +2,12 @@
 #
 # Main entry point for the library/project.
 
-from Network import __NETWORK
-from Record import Record
+from Network import __NETWORK, DUMP_VERSION
+from Record import Record, RecordMarshal
 import re
 from Links import __APPLY_LINKS
 import POS
+import json
 
 _ = __NETWORK
 
@@ -28,12 +29,19 @@ def __save():
   __NETWORK._save()
 
 
-# TODO - load from disk.
-# 1 - get all the record names stubbed
-# 2 - unmarshal each individually.
-# 3 - deal with version changes...
-def __load():
-  pass
+# load from disk.
+def __load(from_file='contextNet.json'):
+  data = json.load(open(from_file, 'r'))
+  # TODO - deal with version changes...
+  assert data['DUMP_VERSION'] == DUMP_VERSION
+
+  # 1 - get all the record names stubbed
+  for r in data['records']:
+    __new(r['name'])
+
+  # 2 - unmarshal each individually.
+  for r in data['records']:
+    RecordMarshal.unmarshal(r)
 
 
 __load()
