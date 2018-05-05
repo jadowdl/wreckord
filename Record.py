@@ -2,6 +2,8 @@ import json
 
 # for __NETWORK.save()
 from Network import __NETWORK
+import POS
+
 _N = __NETWORK # sidestep name manging in the class
 
 # Would have prefered to do this as methods in Record,
@@ -20,9 +22,11 @@ class RecordMarshal:
 
 # TODO - POS, language
 class Record:
-  def __init__(self, name):
+  def __init__(self, name, language='English', pos=POS.NOUN):
     self._name = name
     self._links = {}
+    self._language = language
+    self._pos = pos
 
 
   def _hasLink(self, record, linkType):
@@ -39,7 +43,7 @@ class Record:
   # ease of use.  This way you can just enter the Record Name on the repl line and see
   # it.
   def _prettyRepr(self):
-    rez  = "Record ["+self._name+"]: \n"
+    rez  = "Record ["+self._name+"] (" + self._language+":"+self._pos+") \n"
     if len(self._links) == 0:
       rez += "  (Empty, No Links Yet)\n"
     for link in self._links:

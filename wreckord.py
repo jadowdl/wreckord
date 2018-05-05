@@ -6,16 +6,17 @@ from Network import __NETWORK
 from Record import Record
 import re
 from Links import __APPLY_LINKS
+import POS
 
 _ = __NETWORK
 
-def __new(recordName):
+def __new(recordName, language='English', pos=POS.NOUN):
   recordName = recordName.upper()
   recordName = re.sub(r'\s', '_', recordName)
   if __NETWORK._hasRecord(recordName):
     print ("Could Not Create Record \"" + recordName + "\": already exists")
     return
-  r = Record(recordName)
+  r = Record(recordName, language=language, pos=pos)
   print("==== Created Record '" + recordName + "'")
   __NETWORK._addRecord(r)
   globals()[recordName] = r
