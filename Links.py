@@ -46,6 +46,7 @@ __LINKS = [
 ]
 
 
+
 # ensure uniqueness of link names...
 for i in range(0, len(__LINKS)):
   for j in range(i+1, len(__LINKS)):
@@ -56,5 +57,8 @@ for i in range(0, len(__LINKS)):
 
 
 def __APPLY_LINKS():
+  Record.LINK_LOOKUP_MAP = {}
   for l in __LINKS:
     l.monkeyPatch()
+    Record.LINK_LOOKUP_MAP[l.aToBName] = l
+    Record.LINK_LOOKUP_MAP[l.bToAName] = l
