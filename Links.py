@@ -42,9 +42,18 @@ class Link:
 
 __LINKS = [
   Link('sameAs', 'sameAs'),
-  Link('kindOf', 'generalizationOf')
+  Link('differentFrom', 'differentFrom'),
+  Link('similarTo', 'similarTo'),
+  Link('oppositeOf', 'oppositeOf'),
+  Link('definedBy', 'definingAttributeOf'),
+  Link('hasAttribute', 'attributeOf'),
+  Link('kindOf', 'generalizationOf'),
+  Link('exampleOf', 'abstractionOf'),
+  Link('relatedTo', 'relatedTo'),
+  Link('resultsIn', 'resultOf'),
+  Link('occursWhen', 'occursWhen'),
+  Link('associatedWith', 'associatedWith')
 ]
-
 
 
 # ensure uniqueness of link names...
@@ -61,4 +70,5 @@ def __APPLY_LINKS():
   for l in __LINKS:
     l.monkeyPatch()
     Record.LINK_LOOKUP_MAP[l.aToBName] = l
-    Record.LINK_LOOKUP_MAP[l.bToAName] = l.opposite()
+    if (l.aToBName != l.bToAName):
+      Record.LINK_LOOKUP_MAP[l.bToAName] = l.opposite()
