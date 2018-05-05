@@ -46,7 +46,7 @@ class Record:
       lname = self._links[link]._linkType.aToBName
       if (self is self._links[link]._childRecord):
         lname = self._links[link]._linkType.bToAName
-      rez += "  " +lname + " [" + link + "] (weight=" + self._links[link].weight+")\n"
+      rez += "  " +lname + " [" + link + "] (weight=" + str(self._links[link].weight)+")\n"
     return rez
 
 
