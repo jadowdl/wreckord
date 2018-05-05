@@ -29,6 +29,10 @@ def __save():
   __NETWORK._save()
 
 
+def __show():
+  __NETWORK._show()
+
+
 # load from disk.
 def __load(from_file='contextNet.json'):
   data = json.load(open(from_file, 'r'))
