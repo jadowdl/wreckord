@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 
-from graph_tool.all import *
+## from graph_tool.all import *
 
 class Network:
   def __init__(self):
     self._records = {}
+
+  def _hasRecord(self, name):
+    return name in self._records
 
   # I keep track of both just because I don't know the equivalent of hasOwnProperty for python...
   def _addRecord(self, record):
@@ -15,7 +18,9 @@ class Network:
   def _save(self): pass
 
   def _show(self):
-    g = Graph()
-    
+    ## g = Graph()
+    ## for record in self._records:
+    ##   v = g.add_vertex() 
+    pass  
 
 __NETWORK = Network()
