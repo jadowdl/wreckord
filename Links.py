@@ -61,4 +61,4 @@ def __APPLY_LINKS():
   for l in __LINKS:
     l.monkeyPatch()
     Record.LINK_LOOKUP_MAP[l.aToBName] = l
-    Record.LINK_LOOKUP_MAP[l.bToAName] = l
+    Record.LINK_LOOKUP_MAP[l.bToAName] = l.opposite()
