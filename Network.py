@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-## from graph_tool.all import *
-
+import igraph
 import json
 
 
@@ -36,9 +35,33 @@ class Network:
     stream.close()
 
   def _show(self):
-    ## g = Graph()
-    ## for record in self._records:
-    ##   v = g.add_vertex() 
-    pass  
+    g = igraph.Graph(directed=True)
+
+    # enumerate vertex numbers
+    recordNames = [r for r in self._records.keys()]
+    vertNumbers = {}
+    for i in range(0, len(recordNames)):
+      vertNumbers[recordNames[i]] = i
+
+    # Add vertices, one per record
+    g.add_vertices(len(recordNames))
+    g.vs['label'] = recordNames
+
+    # Add aToB edges
+    edges = []
+    labels = []
+    for r in self._records.values():
+      for (lname, link, weight, dr) in r._genLinkData():
+        if (dr == 'bToA'): continue
+        src = vertNumbers[r._name]
+        dst = vertNumbers[link]
+        edges.append((src, dst))
+        labels.append(lname + ":" + str(weight))
+    g.add_edges(edges)
+    g.es['label'] = labels
+
+    # visualize it
+    layout = g.layout('kk')
+    igraph.plot(g, layout=layout, margin=100, vertex_size=50, vertex_label_size=14)
 
 __NETWORK = Network()
