@@ -1,5 +1,8 @@
 import json
 
+# for __NETWORK.save()
+from Network import __NETWORK
+
 # Would have prefered to do this as methods in Record,
 # but lo-and-behold "@staticmethod def _unmarshal():" becomes hidden!
 class RecordMarshal:
@@ -52,3 +55,4 @@ class RecordLink:
   def deleteLink(self):
     delattr(self._parentRecord, self._childRecord._name)
     delattr(self._childRecord, self._parentRecord._name)
+    __NETWORK._save()
