@@ -1,8 +1,10 @@
-import json
+#!/usr/bin/env python
 
-# for __NETWORK.save()
+# (for __NETWORK.save())
 from Network import __NETWORK
+
 import POS
+import json
 
 _N = __NETWORK # sidestep name manging in the class
 
@@ -10,14 +12,38 @@ _N = __NETWORK # sidestep name manging in the class
 # but lo-and-behold "@staticmethod def _unmarshal():" becomes hidden!
 class RecordMarshal:
   @staticmethod
-  def marshal(record):
-    return json.dumps({"name": record._name})
+  def marshal(record, as_json=True):
+    as_dict = {
+      "name": record._name,
+      "language": record._language,
+      "pos": record._pos,
+      "links": [{"name": lname, "other_record": link, "weight": weight, "dir": direction}
+                for (lname, link, weight, direction) in record._genLinkData()]
+    }
+
+    if (as_json):
+      return json.dumps(as_dict)
+    else:
+      return as_dict
 
 
+  # this is a bit of a hack, because records are global variables.
+  # assumes that the relevant records already exist in _N
+  # merely mangles entries there, in place.
   @staticmethod
-  def unmarshal(str):
-    parse = json.loads(str)
-    return Record(parse['name'])
+  def unmarshal(data, from_json=False):
+    parse = data
+    if (from_json):
+      parse = json.loads(data)
+    r = getattr(_N, parse['name'])
+    r._language = parse['language']
+    r._pos = parse['pos']
+    for link in parse['links']:
+      if (link['dir'] == 'bToA'): continue
+      r2 = getattr(_N, link['other_record'])
+      # LINK_LOOKUP_MAP Created by Links.py
+      linkType = Record.LINK_LOOKUP_MAP[link['name']]
+      RecordLink(r, r2, linkType, link['weight'])
 
 
 # TODO - POS, language
@@ -38,6 +64,19 @@ class Record:
     return isinstance(lookup, RecordLink) and lookup.linkType is linkType
 
 
+  def _genLinkData(self):
+    for link in self._links:
+      direction = 'aToB'
+      lname = self._links[link]._linkType.aToBName
+      if (self is self._links[link]._childRecord):
+        direction='bToA'
+        lname = self._links[link]._linkType.bToAName
+      yield (lname, link, self._links[link].weight, direction)
+
+
+  def _marshal(self, as_json=True):
+    return RecordMarshal.marshal(self, as_json)
+
   # This totally breaks "repr" format, because it can't be used to recreate the Record;
   # but since Greg will be using this from cmdline, I'm sacrificing correctness for
   # ease of use.  This way you can just enter the Record Name on the repl line and see
@@ -46,11 +85,8 @@ class Record:
     rez  = "Record ["+self._name+"] (" + self._language+":"+self._pos+") \n"
     if len(self._links) == 0:
       rez += "  (Empty, No Links Yet)\n"
-    for link in self._links:
-      lname = self._links[link]._linkType.aToBName
-      if (self is self._links[link]._childRecord):
-        lname = self._links[link]._linkType.bToAName
-      rez += "  " +lname + " [" + link + "] (weight=" + str(self._links[link].weight)+")\n"
+    for (lname, link, weight, _) in self._genLinkData():
+      rez += "  " +lname + " [" + link + "] (weight=" + str(weight)+")\n"
     return rez
 
 
@@ -60,7 +96,7 @@ class Record:
 
 
   def __str__(self):
-    return RecordMarshal.marshal()
+    return RecordMarshal.marshal(self)
 
 
 # Represents an individual link from record A to record B.
