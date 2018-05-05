@@ -2,6 +2,7 @@ import json
 
 # for __NETWORK.save()
 from Network import __NETWORK
+_N = __NETWORK # sidestep name manging in the class
 
 # Would have prefered to do this as methods in Record,
 # but lo-and-behold "@staticmethod def _unmarshal():" becomes hidden!
@@ -15,12 +16,13 @@ class RecordMarshal:
   def unmarshal(str):
     parse = json.loads(str)
     return Record(parse['name'])
-  
+
 
 # TODO - POS, language
 class Record:
   def __init__(self, name):
     self._name = name
+    self._links = {}
 
 
   def _hasLink(self, record, linkType):
@@ -32,8 +34,25 @@ class Record:
     return isinstance(lookup, RecordLink) and lookup.linkType is linkType
 
 
+  # This totally breaks "repr" format, because it can't be used to recreate the Record;
+  # but since Greg will be using this from cmdline, I'm sacrificing correctness for
+  # ease of use.  This way you can just enter the Record Name on the repl line and see
+  # it.
+  def _prettyRepr(self):
+    rez  = "Record ["+self._name+"]: \n"
+    if len(self._links) == 0:
+      rez += "  (Empty, No Links Yet)\n"
+    for link in self._links:
+      lname = self._links[link]._linkType.aToBName
+      if (self is self._links[link]._childRecord):
+        lname = self._links[link]._linkType.bToAName
+      rez += "  " +lname + " [" + link + "]\n"
+    return rez
+
+
   def __repr__(self):
-    return "RecordMarshal.unmarshal(\"\"\"" +RecordMarshal.marshal(self)+"\"\"\")"
+    # return "RecordMarshal.unmarshal(\"\"\"" +RecordMarshal.marshal(self)+"\"\"\")"
+    return self._prettyRepr()
 
 
   def __str__(self):
@@ -49,10 +68,14 @@ class RecordLink:
     self._linkType = linkType
     self.weight = weight
     setattr(parentRecord, childRecord._name, self)
+    parentRecord._links[childRecord._name] = self
     setattr(childRecord, parentRecord._name, self)
+    childRecord._links[parentRecord._name] = self
 
 
   def deleteLink(self):
     delattr(self._parentRecord, self._childRecord._name)
+    del self._parentRecord._links[self._childRecord._name]
     delattr(self._childRecord, self._parentRecord._name)
-    __NETWORK._save()
+    del self._childRecord._links[self._parentRecord._name]
+    _N._save()
